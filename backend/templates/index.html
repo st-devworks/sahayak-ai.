@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sahayak AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Sahayak AI</h1>
+      <p class="subtitle">Ask anything. Get instant help.</p>
+
+      <form id="chat-form">
+        <input id="query" type="text" placeholder="Type your question..." autofocus />
+        <button type="submit">Ask</button>
+      </form>
+
+      <div id="response" class="card" hidden>
+        <h2>Response</h2>
+        <pre id="reply"></pre>
+      </div>
+    </div>
+
+    <script>
+      const form = document.getElementById('chat-form');
+      const input = document.getElementById('query');
+      const card = document.getElementById('response');
+      const reply = document.getElementById('reply');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const query = input.value.trim();
+        if (!query) return;
+
+        reply.textContent = "Thinking...";
+        card.hidden = false;
+
+        try {
+          const res = await fetch('/api/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+          });
+          const data = await res.json();
+          if (data.reply) {
+            reply.textContent = data.reply;
+          } else {
+            reply.textContent = data.error || 'No reply received.';
+          }
+        } catch (err) {
+          reply.textContent = 'Network error. Check the server console.';
+        }
+      });
+    </script>
+  </body>
+</html>
